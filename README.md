@@ -10,14 +10,9 @@ This project aims to classify news articles into different categories using a **
 news_classification_project/
 ├── data/
 │   └── news_category.json       # HuffPost dataset in JSON format
-├── notebooks/
-│   └── project.ipynb            # (Optional) Exploratory notebook
+│   └── glove.6B.100d.txt        # .............
 ├── src/
 │   ├── main.py                  # Main Python script
-│   ├── data_ingestion.py        # (Optional) Data loading/parsing module
-│   ├── preprocessing.py         # (Optional) Text cleaning & feature extraction
-│   ├── train_svm.py            # (Optional) SVM pipeline
-│   └── train_cnn.py            # (Optional) CNN pipeline
 ├── .gitignore                   # Git ignore file
 ├── requirements.txt             # List of Python dependencies
 └── README.md                    # This file (project documentation)
