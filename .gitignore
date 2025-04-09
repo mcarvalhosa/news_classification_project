@@ -1,0 +1,24 @@
+# Virtual envs
+.venv/
+env/
+
+# Dataset & models
+*.csv
+*.json
+*.txt
+*.pyd
+*.dll
+*.h5
+
+# Tensorflow internals
+**/_pywrap_tensorflow_internal.pyd
+
+# Checkpoints
+src/tuner_results/
+
+# VSCode
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
