@@ -35,8 +35,12 @@ news_classification_project/
    
 3. **Install Dependencies**:
    pip install -r requirements.txt
-
-Make sure you have Python 3.7+ installed.
+   
+   Make sure you have Python 3.7+ installed.
+   
+4. **Manually download the spaCy model and GloVe embeddings**:
+   - python -m spacy download en_core_web_sm
+   - Download GloVe 6B 100d and place it in /data.
 
 
 ## Usage
@@ -68,6 +72,8 @@ Make sure you have Python 3.7+ installed.
 - **Category Merging**: Combined semantically similar labels (e.g., "STYLE" + "STYLE & BEAUTY") to reduce class fragmentation and improve learning.
 - **Empty Text Handling**: Removed 5 entries with empty strings in the `text` column (despite not being null).
 - **Train/Validation/Test Split**: Used a 70/15/15 stratified split to maintain category proportions across all subsets.
+
+---
 
 ### 2. Models Tested
 
@@ -147,13 +153,14 @@ Make sure you have Python 3.7+ installed.
 ## License
 This project uses the **Attribution 4.0 International (CC BY 4.0)** license for the dataset. See the [HuffPost dataset page](https://www.kaggle.com/datasets/rmisra/news-category-dataset) for details. Any code in this repository is available under your chosen license (e.g., MIT, Apache 2.0), which you can specify here.
 
-## Contact
-For any questions or suggestions, please feel free to open an issue in the GitHub repository or reach out to [Martim Carvalhosa](mailto:mcarvalhosa.mam2025@london.edu). 
-
 ## Acknowledgements
 - **HuffPost News Dataset** for the source data.
 - **GloVe** for pretrained word embeddings.
 - The community behind **spaCy** and **Keras** for their excellent tools and support.
+
+## Contact
+Martim Carvalhosa – MSc in Analytics and Management @ London Business School
+For any questions or suggestions, please feel free to open an issue in the GitHub repository or reach out to [Martim Carvalhosa](mailto:mcarvalhosa.mam2025@london.edu). 
 
 ---
 
