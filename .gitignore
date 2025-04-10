@@ -7,6 +7,7 @@ env/
 *.json
 *.txt
 *.pyd
+*.pyc
 *.dll
 *.h5
 
@@ -16,9 +17,7 @@ env/
 # Checkpoints
 src/tuner_results/
 
-# VSCode
-.vscode/
-
 # System files
+.ipynb_checkpoints/
 .DS_Store
 Thumbs.db

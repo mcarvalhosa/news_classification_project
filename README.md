@@ -3,27 +3,28 @@
 **Project Title**: News Category Classification (HuffPost Dataset)
 
 ## Overview
-This project aims to classify news articles into different categories using a **CNN-based deep learning model** and a **classical SVM baseline**. By comparing these two approaches, we demonstrate how text preprocessing, feature engineering (TF-IDF), and hyperparameter tuning can significantly impact classification performance.
+This project aims to classify news articles into different categories using a **CNN-based deep learning model** and a **classical SVM baseline**. I also explored **LSTM** and **GRU** architectures to compare performance across traditional and sequential models. The project emphasizes the importance of text preprocessing, feature engineering (TF-IDF), dimensionality reduction (TruncatedSVD), and hyperparameter tuning in building effective classification models.
 
 ## Folder Structure
 
 news_classification_project/
 ├── data/
-│   └── news_category.json       # HuffPost dataset in JSON format
-│   └── glove.6B.100d.txt        # .............
+│   ├── news_category_dataset.json     # HuffPost dataset in JSON format  
+│   ├── glove.6B.100d.txt              # Pretrained GloVe embeddings (100D)
+├── cleaned_dataset.csv                # Full preprocessed dataset
+├── cleaned_sample_dataset.csv         # Sample (20k) dataset for modeling
 ├── src/
-│   ├── main.py                  # Main Python script
-├── .gitignore                   # Git ignore file
-├── requirements.txt             # List of Python dependencies
-└── README.md                    # This file (project documentation)
+│   ├── main.ipynb (optional)          # Main Python script
+├── .gitignore                         # Git ignore file
+├── requirements.txt                   # List of Python dependencies
+└── README.md                          # This file (project documentation)
 
 
 ## Data
 - **Dataset**: [HuffPost News Category Dataset](https://www.kaggle.com/datasets/rmisra/news-category-dataset)
 - **Format**: JSON file containing each article’s category, headline, short description, authors, link, and publication date.
-- **Categories**: Up to 42 categories (e.g., POLITICS, WELLNESS, SPORTS, etc.).
+- **Categories**: Initially 42 categories. After merging semantically similar categories (e.g., “ARTS” + “CULTURE & ARTS”), I worked with 28 final classes.
 
-> **Note**: If the dataset is large, you may want to sample or filter categories to reduce training time.
 
 ## Installation
 1. **Clone the Repository**:
@@ -34,74 +35,126 @@ news_classification_project/
    
 3. **Install Dependencies**:
    pip install -r requirements.txt
+
 Make sure you have Python 3.7+ installed.
+
 
 ## Usage
 
 1. **Add the Dataset**:  
    - Place your `news_category.json` file into the `data` folder.
+   - Place your `GloVe embeddings` (glove.6B.100d.txt) into the same `data` folder.
 
 2. **Run the Main Script**:
     python src/main.py
    
    This will:
    - Load the dataset.
+   - Visualize category distributions.
    - Preprocess the text (tokenization, lowercasing, etc.).
-   - Train the SVM baseline with TF-IDF.
-   - Train the CNN model.
-   - Evaluate and compare results.
-
-3. **(Optional) Use the Notebook**:  
-   If you want an interactive environment for exploratory data analysis (EDA), open the provided notebook:
-   
-   *jupyter notebook notebooks/project.ipynb*
+   - Train and evaluate models (SVM, CNN, LSTM, GRU)
+   - Perform hyperparameter tuning using Keras Tuner
+   - Compare model performance and display confusion matrices
    
    Run cells step-by-step to visualize class distributions, run partial training, etc.
 
+
 ## Methodology
 
-### Data Preprocessing
-- **Text Cleaning**: Lowercasing, tokenization, and stopword removal using NLTK.
-- **Optional**: Lemmatization or stemming to normalize tokens.
-- **Train/Validation/Test Split**: Usually 70/15/15 or 80/10/10.
+### 1. Data Preprocessing
 
-### Baseline: SVM + TF-IDF
-1. **TF-IDF Vectorization**: Convert text into numerical features.
-2. **SVM Classifier**: A baseline model using a linear or RBF kernel.
-3. **Hyperparameter Tuning**: Use GridSearchCV or RandomizedSearchCV to find optimal regularization parameters (e.g., `C`, `gamma`).
+- **Text Cleaning**: Lowercased text, removed punctuation, and applied lemmatization using spaCy.
+- **Stopword Removal**: Used NLTK and spaCy’s default stopword lists to reduce noise.
+- **Category Merging**: Combined semantically similar labels (e.g., "STYLE" + "STYLE & BEAUTY") to reduce class fragmentation and improve learning.
+- **Empty Text Handling**: Removed 5 entries with empty strings in the `text` column (despite not being null).
+- **Train/Validation/Test Split**: Used a 70/15/15 stratified split to maintain category proportions across all subsets.
 
-### Deep Learning: CNN
-1. **Embedding**: Trainable embedding layer or pretrained embeddings (e.g., GloVe).
-2. **1D Convolution**: Capture local n-gram features.
-3. **Pooling**: Reduce sequence length while retaining important features.
-4. **Dense Layers**: Final classification with softmax activation.
-5. **Hyperparameter Tuning**: Adjust learning rate, batch size, number of filters, kernel size, etc.
+### 2. Models Tested
 
-## Evaluation & Metrics
-- **Accuracy**: Overall percentage of correct predictions.
-- **F1-Score**: Especially relevant if certain categories are imbalanced.
-- **Confusion Matrix**: Identify which categories are most misclassified.
+#### 2.1 Baseline: SVM + TF-IDF + TruncatedSVD
 
-## Hyperparameter Tuning
-- **SVM**: Use `GridSearchCV` (scikit-learn) to try different `C`, kernel types, etc.
-- **CNN**: Adjust learning rate, batch size, embedding size, number of Conv1D filters, etc.  
-  You can manually adjust these or use advanced tools (e.g., Optuna).
+- **TF-IDF Vectorization**:
+  - Used unigrams and bigrams (`ngram_range=(1, 2)`)
+  - Removed rare words (`min_df=5`) and overly common ones (`max_df=0.8`)
+  - Limited vocabulary to 10,000 features
+- **Dimensionality Reduction**:
+  - Used TruncatedSVD with 300 components (instead of PCA) to preserve structure in sparse matrices
+- **Linear SVM**:
+  - Trained with `class_weight="balanced"` to address imbalance
+  - Tuned `C` using `GridSearchCV` with 3-fold cross-validation
 
-## Results
-- After training both models, compare performance metrics.  
-- **Typical Findings**: CNN might outperform SVM if enough data and proper tuning are applied, but SVM often trains faster and can be easier to tune for moderate datasets.
+#### 2.2 Deep Learning: CNN, LSTM, GRU
 
-## Further Improvements
-- **Dimensionality Reduction** (e.g., PCA) on TF-IDF features for SVM.
-- **More Sophisticated Embeddings**: Pretrained word embeddings or Transformer-based approaches.
-- **Data Augmentation**: If certain categories are underrepresented.
+- **Embeddings**:
+  - Loaded GloVe 100D pretrained vectors
+  - Created an embedding matrix and set `trainable=True` to allow fine-tuning
+- **CNN Architecture**:
+  - Embedding → Conv1D (128 filters, kernel size 3) → GlobalMaxPooling → Dense → Dropout → Output
+  - Trained with early stopping and class weights
+- **LSTM & GRU**:
+  - Replaced Conv1D with LSTM(64) and GRU(64) layers, followed by similar dropout and dense layers
+  - Used same tokenized and padded input sequences
+  - Trained with early stopping and class weights
+
+#### 2.3 CNN Hyperparameter Tuning (Keras Tuner)
+
+- Tuned key hyperparameters:
+  - `embedding_dim`: [50, 100, 200]
+  - `filters`: [64, 128, 256]
+  - `kernel_size`: [3, 4, 5]
+  - `dropout`: 0.3–0.6
+  - `dense_units`: [32, 64, 128]
+- Used `RandomSearch` with validation accuracy as the optimization objective
+- Best model used:
+  - `embedding_dim=100`, `filters=256`, `kernel_size=3`, `dropout=0.5`, `dense_units=32`
+
+---
+
+### 3. Evaluation & Metrics
+
+- **Accuracy**: Overall test accuracy
+- **Weighted F1 Score**: Adjusted for class imbalance
+- **Confusion Matrix**: For visualizing prediction confusion
+- **Classification Report**: Formatted into a pandas DataFrame for sorting
+- **F1 Score Bar Chart**: Displayed per category to identify best/worst performing labels
+
+---
+
+### 4. Results Summary
+
+| Model               | Accuracy | Weighted F1 Score |
+|---------------------|----------|-------------------|
+| SVM (TF-IDF + SVD)  | 0.516    | 0.526             |
+| CNN (Tuned)         | 0.558    | 0.530             |
+
+- The CNN model outperformed the SVM across most metrics.
+- Categories like **WELLNESS**, **STYLE & BEAUTY**, and **TRAVEL** had high F1 scores.
+- Harder-to-predict categories included **MONEY**, **SCIENCE**, and **IMPACT**.
+
+---
+
+### 5. Further Improvements
+
+- **Try Transformer Models**:
+  - Incorporate BERT or DistilBERT for better contextual understanding
+- **Upsample or Augment Low-Frequency Classes**:
+  - Use paraphrasing, synonym replacement, or back-translation
+- **Interpretability Tools**:
+  - Apply SHAP or LIME to visualize which words influenced predictions
+
+
 
 ## License
 This project uses the **Attribution 4.0 International (CC BY 4.0)** license for the dataset. See the [HuffPost dataset page](https://www.kaggle.com/datasets/rmisra/news-category-dataset) for details. Any code in this repository is available under your chosen license (e.g., MIT, Apache 2.0), which you can specify here.
 
 ## Contact
-For any questions or suggestions, please feel free to open an issue in the GitHub repository or reach out to [Your Name](mailto:youremail@example.com). 
+For any questions or suggestions, please feel free to open an issue in the GitHub repository or reach out to [Martim Carvalhosa](mailto:mcarvalhosa.mam2025@london.edu). 
+
+## Acknowledgements
+- **HuffPost News Dataset** for the source data.
+- **GloVe** for pretrained word embeddings.
+- The community behind **spaCy** and **Keras** for their excellent tools and support.
 
 ---
 
-Thank you for checking out the **News Classification Project**! We hope this serves as a solid baseline to explore text categorization techniques using both classical machine learning and deep learning approaches.
+Thank you for checking out the **News Classification Project**! I hope this serves as a solid baseline to explore text categorization techniques using both classical machine learning and deep learning approaches.
