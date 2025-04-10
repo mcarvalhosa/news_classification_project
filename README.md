@@ -70,7 +70,7 @@ news_classification_project/
 
 - **Text Cleaning**: Lowercased text, removed punctuation, and applied lemmatization using spaCy.
 - **Stopword Removal**: Used NLTK and spaCy’s default stopword lists to reduce noise.
-- **Category Merging**: Combined semantically similar labels (e.g., "STYLE" + "STYLE & BEAUTY") to reduce class fragmentation and improve learning.
+- **Category Merging**: Combined semantically similar labels (e.g., "STYLE" + "STYLE & BEAUTY") to reduce class fragmentation and improve learning. I then removed the rare category "LATINO VOICES", resulting in 28 final classes.
 - **Empty Text Handling**: Removed 5 entries with empty strings in the `text` column (despite not being null).
 - **Train/Validation/Test Split**: Used a 70/15/15 stratified split to maintain category proportions across all subsets.
 
@@ -78,7 +78,7 @@ news_classification_project/
 
 ### 2. Models Tested
 
-#### 2.1 Baseline: SVM + TF-IDF + TruncatedSVD
+#### 2.1 Baseline: SVM (TF-IDF + TruncatedSVD)
 
 - **TF-IDF Vectorization**:
   - Used unigrams and bigrams (`ngram_range=(1, 2)`)
@@ -90,17 +90,21 @@ news_classification_project/
   - Trained with `class_weight="balanced"` to address imbalance
   - Tuned `C` using `GridSearchCV` with 3-fold cross-validation
 
+SVM served as a strong classical baseline, but its reliance on sparse TF-IDF vectors limits its ability to capture deep semantic meaning in text. This motivated the use of deep learning models for richer representation.
+
+
 #### 2.2 Deep Learning: CNN, LSTM, GRU
 
 - **Embeddings**:
   - Loaded GloVe 100D pretrained vectors
   - Created an embedding matrix and set `trainable=True` to allow fine-tuning
 - **CNN Architecture**:
-  - Embedding → Conv1D (128 filters, kernel size 3) → GlobalMaxPooling → Dense → Dropout → Output
+  - Embedding → Conv1D(256 filters, kernel size=3) → GlobalMaxPool1D → Dense(32) → Dropout(0.3) → Output(28)
   - Trained with early stopping and class weights
 - **LSTM & GRU**:
   - Replaced Conv1D with LSTM(64) and GRU(64) layers, followed by similar dropout and dense layers
   - Used same tokenized and padded input sequences
+  - Sequences were padded/truncated to a maximum length of 100 tokens based on EDA analysis (95th percentile at 55 words), balancing coverage and avoiding over-padding.
   - Trained with early stopping and class weights
 
 #### 2.3 CNN Hyperparameter Tuning (Keras Tuner)
@@ -113,7 +117,7 @@ news_classification_project/
   - `dense_units`: [32, 64, 128]
 - Used `RandomSearch` with validation accuracy as the optimization objective
 - Best model used:
-  - `embedding_dim=100`, `filters=256`, `kernel_size=3`, `dropout=0.5`, `dense_units=32`
+  - `embedding_dim=200`, `filters=256`, `kernel_size=3`, `dropout=0.5`, `dense_units=32`
 
 ---
 
@@ -129,15 +133,17 @@ news_classification_project/
 
 ### 4. Results Summary
 
+The classical SVM model (TF-IDF + SVD) served as a baseline, and all deep learning models were evaluated relative to it. This allowed for a fair performance benchmark using consistent datasets and preprocessing steps.
+
 | Model               | Accuracy | Weighted F1 Score |
 |---------------------|----------|-------------------|
 | SVM (TF-IDF + SVD)  | 0.538    | 0.546             |
 | CNN (Tuned)         | 0.610    | 0.592             |
-| LSTM                | 0.615    | 0.587             |
-| GRU                 | 0.629    | 0.613             |
+| LSTM                | 0.633    | 0.621             |
+| GRU                 | 0.627    | 0.601             |
 
 
-- GRU achieved the best overall performance
+- **LSTM** achieved the best overall performance
 - Sequential models (LSTM, GRU) slightly outperformed CNN in both accuracy and F1 score.
 - Categories like **WELLNESS**, **STYLE & BEAUTY**, and **TRAVEL** had high F1 scores.
 - Harder-to-predict categories included **MONEY**, **SCIENCE**, and **IMPACT**.
