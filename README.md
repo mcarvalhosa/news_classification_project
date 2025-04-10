@@ -11,10 +11,11 @@ news_classification_project/
 ├── data/
 │   ├── news_category_dataset.json     # HuffPost dataset in JSON format  
 │   ├── glove.6B.100d.txt              # Pretrained GloVe embeddings (100D)
-├── cleaned_dataset.csv                # Full preprocessed dataset
-├── cleaned_sample_dataset.csv         # Sample (20k) dataset for modeling
 ├── src/
-│   ├── main.ipynb (optional)          # Main Python script
+│   ├── main.ipynb                     # Main Python notebook script
+│   ├── main.html                      # HTML notebook version
+│   ├── cleaned_dataset.csv            # Full preprocessed dataset
+│   ├── cleaned_sample_dataset.csv     # Sample (50k) dataset for modeling
 ├── .gitignore                         # Git ignore file
 ├── requirements.txt                   # List of Python dependencies
 └── README.md                          # This file (project documentation)
@@ -130,10 +131,14 @@ news_classification_project/
 
 | Model               | Accuracy | Weighted F1 Score |
 |---------------------|----------|-------------------|
-| SVM (TF-IDF + SVD)  | 0.516    | 0.526             |
-| CNN (Tuned)         | 0.558    | 0.530             |
+| SVM (TF-IDF + SVD)  | 0.538    | 0.546             |
+| CNN (Tuned)         | 0.610    | 0.592             |
+| LSTM                | 0.615    | 0.587             |
+| GRU                 | 0.629    | 0.613             |
 
-- The CNN model outperformed the SVM across most metrics.
+
+- GRU achieved the best overall performance
+- Sequential models (LSTM, GRU) slightly outperformed CNN in both accuracy and F1 score.
 - Categories like **WELLNESS**, **STYLE & BEAUTY**, and **TRAVEL** had high F1 scores.
 - Harder-to-predict categories included **MONEY**, **SCIENCE**, and **IMPACT**.
 
